@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CrossDebate - AI Model Interaction Platform</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary-color: #3a6ea5;
+      --secondary-color: #c0d6df;
+      --accent-color: #ff6b6b;
+      --light-bg: #f8f9fa;
+      --dark-bg: #343a40;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f7fa;
+      color: #333;
+      line-height: 1.6;
+      padding-top: 60px;
+    }
+    
+    .navbar-brand {
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .logo {
+      width: 36px;
+      height: 36px;
+    }
+    
+    .navbar {
+      background-color: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .card {
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      transition: transform 0.3s, box-shadow 0.3s;
+      margin-bottom: 1.5rem;
+      border: none;
+      overflow: hidden;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .card-header {
+      background-color: var(--primary-color);
+      color: white;
+      font-weight: 600;
+      padding: 0.75rem 1.25rem;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .btn-outline-primary {
+      color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .model-selector {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
+    .chat-container {
+      height: 400px;
+      overflow-y: auto;
+      padding: 1rem;
+      background-color: #f9f9f9;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .message {
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border-radius: 0.5rem;
+      max-width: 85%;
+    }
+    
+    .user-message {
+      background-color: #d1e7ff;
+      margin-left: auto;
+    }
+    
+    .bot-message {
+      background-color: #e9ecef;
+    }
+    
+    .chart-container {
+      position: relative;
+      height: 300px;
+      width: 100%;
+    }
+    
+    .footer {
+      background-color: var(--light-bg);
+      padding: 2rem 0;
+      margin-top: 3rem;
+    }
+    
+    .tabs-container .nav-link {
+      color: #495057;
+      font-weight: 500;
+    }
+    
+    .tabs-container .nav-link.active {
+      color: var(--primary-color);
+      border-bottom: 3px solid var(--primary-color);
+      background: transparent;
+    }
+    
+    .model-card {
+      cursor: pointer;
+      padding: 0.5rem;
+      border: 1px solid #dee2e6;
+      border-radius: 5px;
+      margin-bottom: 0.5rem;
+    }
+    
+    .model-card.selected {
+      background-color: #d1e7ff;
+      border-color: var(--primary-color);
+    }
+    
+    .fine-tuning-options label {
+      font-weight: 500;
+      margin-top: 0.5rem;
+    }
+    
+    #visualization-container .nav-link {
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">
+        <img src="assets/images/logo.svg" alt="CrossDebate Logo" class="logo">
+        CrossDebate
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link active" href="#models">Models</a></li>
+          <li class="nav-item"><a class="nav-link" href="#visualization">Visualization</a></li>
+          <li class="nav-item"><a class="nav-link" href="#fine-tuning">Fine-Tuning</a></li>
+          <li class="nav-item"><a class="nav-link" href="#evaluation">Evaluation</a></li>
+          <li class="nav-item"><a class="nav-link" href="#documentation">Docs</a></li>
+          <li class="nav-item"><a class="nav-link btn btn-outline-primary ms-2" href="#login">Login</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <h1 class="text-center mb-4">CrossDebate AI Model Interface</h1>
+    
+    <div class="row mb-4">
+      <div class="col-md-3">
+        <div class="card">
+          <div class="card-header">Navigation</div>
+          <div class="card-body p-0">
+            <div class="list-group list-group-flush">
+              <a href="#q4-models" class="list-group-item list-group-item-action">Q4 Models</a>
+              <a href="#q8-models" class="list-group-item list-group-item-action">Q8 Models</a>
+              <a href="#visualization" class="list-group-item list-group-item-action">Data Visualization</a>
+              <a href="#fine-tuning" class="list-group-item list-group-item-action">Fine-Tuning</a>
+              <a href="#evaluation" class="list-group-item list-group-item-action">Model Evaluation</a>
+              <a href="#batch-processing" class="list-group-item list-group-item-action">Batch Processing</a>
+              <a href="#settings" class="list-group-item list-group-item-action">Settings</a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card mt-4">
+          <div class="card-header">Recent Sessions</div>
+          <div class="card-body p-2">
+            <div class="list-group list-group-flush">
+              <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                Session #1283
+                <span class="badge bg-primary rounded-pill">Q4</span>
+              </a>
+              <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                Session #1282
+                <span class="badge bg-info rounded-pill">Q8</span>
+              </a>
+              <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                Session #1280
+                <span class="badge bg-success rounded-pill">Fine-tuning</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-9">
+        <!-- Model Interaction Tabs -->
+        <ul class="nav nav-tabs mb-3 tabs-container" id="modelTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="q4-tab" data-bs-toggle="tab" data-bs-target="#q4-content" type="button" role="tab" aria-controls="q4-content" aria-selected="true">Q4 Models</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="q8-tab" data-bs-toggle="tab" data-bs-target="#q8-content" type="button" role="tab" aria-controls="q8-content" aria-selected="false">Q8 Models</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="visualization-tab" data-bs-toggle="tab" data-bs-target="#visualization-content" type="button" role="tab" aria-controls="visualization-content" aria-selected="false">Visualization</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="fine-tuning-tab" data-bs-toggle="tab" data-bs-target="#fine-tuning-content" type="button" role="tab" aria-controls="fine-tuning-content" aria-selected="false">Fine-Tuning</button>
+          </li>
+        </ul>
+        
+        <div class="tab-content" id="modelTabsContent">
+          <!-- Q4 Models Tab -->
+          <div class="tab-pane fade show active" id="q4-content" role="tabpanel" aria-labelledby="q4-tab">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Q4 Model Interaction</h5>
+                <div class="row">
+                  <div class="col-md-4">
+                    <h6>Select Q4 Model</h6>
+                    <div class="model-selector">
+                      <div class="model-card selected">
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="q4model" id="q4model1" checked>
+                          <label class="form-check-label" for="q4model1">
+                            LLaMA-2-7B-Q4
+                          </label>
+                        </div>
+                      </div>
+                      <div class="model-card">
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="q4model" id="q4model2">
+                          <label class="form-check-label" for="q4model2">
+                            BLOOM-7B-Q4
+                          </label>
+                        </div>
+                      </div>
+                      <div class="model-card">
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="q4model" id="q4model3">
+                          <label class="form-check-label" for="q4model3">
+                            Mistral-7B-Q4
+                          </label>
+                        </div>
+                      </div>
+                      <div class="model-card">
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="q4model" id="q4model4">
+                          <label class="form-check-label" for="q4model4">
+                            Falcon-7B-Q4
+                          </label>
+                        </div>
+                      </div>
+                      <div class="model-card">
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="q4model" id="q4model5">
+                          <label class="form-check-label" for="q4model5">
+                            MPT-7B-Q4
+                          </label>
+                        </div>
+                      </div>
+                      <!-- Add more models as needed -->
+                      <div class="model-card">
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="q4model" id="q4model6">
+                          <label class="form-check-label" for="q4model6">
+                            Pythia-6.9B-Q4
+                          </label>
+                        </div>
+                      </div>
+                      <div class="model-card">
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="q4model" id="q4model7">
+                          <label class="form-check-label" for="q4model7">
+                            StableLM-7B-Q4
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <h6 class="mt-3">Parameters</h6>
+                    <div class="mb-3">
+                      <label for="q4temperature" class="form-label">Temperature</label>
+                      <input type="range" class="form-range" min="0" max="2" step="0.1" value="0.7" id="q4temperature">
+                      <div class="d-flex justify-content-between">
+                        <small>0</small>
+                        <small id="q4tempValue">0.7</small>
+                        <small>2.0</small>
+                      </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                      <label for="q4topp" class="form-label">Top-p</label>
+                      <input type="range" class="form-range" min="0.1" max="1" step="0.05" value="0.9" id="q4topp">
+                      <div class="d-flex justify-content-between">
+                        <small>0.1</small>
+                        <small id="q4toppValue">0.9</small>
+                        <small>1.0</small>
+                      </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                      <label for="q4context" class="form-label">Context Window</label>
+                      <select class="form-select" id="q4context">
+                        <option value="512">512 tokens</option>
+                        <option value="1024">1024 tokens</option>
+                        <option value="2048" selected>2048 tokens</option>
+                        <option value="4096">4096 tokens</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div class="col-md-8">
+                    <div class="chat-container" id="q4chat">
+                      <div class="message bot-message">
+                        <p>Hello! I'm the selected Q4 quantized model. How can I help you today?</p>
+                      </div>
+                      <!-- Chat messages will appear here -->
+                    </div>
+                    <div class="input-group">
+                      <input type="text" class="form-control" id="q4message" placeholder="Type your message...">
+                      <button class="btn btn-primary" type="button" id="q4send">Send</button>
+                    </div>
+                    <div class="mt-2 d-flex justify-content-between">
+                      <button class="btn btn-sm btn-outline-secondary" id="q4clear">Clear Chat</button>
+                      <button class="btn btn-sm btn-outline-primary" id="q4export">Export Conversation</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Q8 Models Tab -->
+          <div class="tab-pane fade" id="q8-content" role="tabpanel" aria-labelledby="q8-tab">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Q8 Model Interaction</h5>
+                <div class="row">
+                  <div class="col-md-4">
+                    <h6>Select Q8 Model</h6>
+                    <div class="model-selector">
+                      <div class="model-card selected">
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="q8model" id="q8model1" checked>
+                          <label class="form-check-label" for="q8model1">
+                            LLaMA-2-7B-Q8
+                          </label>
+                        </div>
+                      </div>
+                      <div class="model-card">
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="q8model" id="q8model2">
+                          <label class="form-check-label" for="q8model2">
+                            BLOOM-7B-Q8
+                          </label>
+                        </div>
+                      </div>
+                      <div class="model-card">
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="q8model" id="q8model3">
+                          <label class="form-check-label" for="q8model3">
+                            Mistral-7B-Q8
+                          </label>
+                        </div>
+                      </div>
+                      <div class="model-card">
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="q8model" id="q8model4">
+                          <label class="form-check-label" for="q8model4">
+                            Falcon-7B-Q8
+                          </label>
+                        </div>
+                      </div>
+                      <div class="model-card">
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="q8model" id="q8model5">
+                          <label class="form-check-label" for="q8model5">
+                            MPT-7B-Q8
+                          </label>
+                        </div>
+                      </div>
+                      <!-- Add more models as needed -->
+                      <div class="model-card">
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="q8model" id="q8model6">
+                          <label class="form-check-label" for="q8model6">
+                            Pythia-6.9B-Q8
+                          </label>
+                        </div>
+                      </div>
+                      <div class="model-card">
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="q8model" id="q8model7">
+                          <label class="form-check-label" for="q8model7">
+                            StableLM-7B-Q8
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <h6 class="mt-3">Parameters</h6>
+                    <div class="mb-3">
+                      <label for="q8temperature" class="form-label">Temperature</label>
+                      <input type="range" class="form-range" min="0" max="2" step="0.1" value="0.7" id="q8temperature">
+                      <div class="d-flex justify-content-between">
+                        <small>0</small>
+                        <small id="q8tempValue">0.7</small>
+                        <small>2.0</small>
+                      </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                      <label for="q8topp" class="form-label">Top-p</label>
+                      <input type="range" class="form-range" min="0.1" max="1" step="0.05" value="0.9" id="q8topp">
+                      <div class="d-flex justify-content-between">
+                        <small>0.1</small>
+                        <small id="q8toppValue">0.9</small>
+                        <small>1.0</small>
+                      </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                      <label for="q8context" class="form-label">Context Window</label>
+                      <select class="form-select" id="q8context">
+                        <option value="512">512 tokens</option>
+                        <option value="1024">1024 tokens</option>
+                        <option value="2048" selected>2048 tokens</option>
+                        <option value="4096">4096 tokens</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div class="col-md-8">
+                    <div class="chat-container" id="q8chat">
+                      <div class="message bot-message">
+                        <p>Hello! I'm the selected Q8 quantized model. How can I help you today?</p>
+                      </div>
+                      <!-- Chat messages will appear here -->
+                    </div>
+                    <div class="input-group">
+                      <input type="text" class="form-control" id="q8message" placeholder="Type your message...">
+                      <button class="btn btn-primary" type="button" id="q8send">Send</button>
+                    </div>
+                    <div class="mt-2 d-flex justify-content-between">
+                      <button class="btn btn-sm btn-outline-secondary" id="q8clear">Clear Chat</button>
+                      <button class="btn btn-sm btn-outline-primary" id="q8export">Export Conversation</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Visualization Tab -->
+          <div class="tab-pane fade" id="visualization-content" role="tabpanel" aria-labelledby="visualization-tab">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Data Visualization</h5>
+                
+                <ul class="nav nav-pills mb-3" id="visualization-subtabs" role="tablist">
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="anova-tab" data-bs-toggle="pill" data-bs-target="#anova-content" type="button" role="tab">ANOVA</button>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="regression-tab" data-bs-toggle="pill" data-bs-target="#regression-content" type="button" role="tab">Regression</button>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="perf-comparison-tab" data-bs-toggle="pill" data-bs-target="#perf-comparison-content" type="button" role="tab">Performance Comparison</button>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="custom-chart-tab" data-bs-toggle="pill" data-bs-target="#custom-chart-content" type="button" role="tab">Custom Chart</button>
+                  </li>
+                </ul>
+                
+                <div class="tab-content" id="visualization-subtabs-content">
+                  <!-- ANOVA Tab -->
+                  <div class="tab-pane fade show active" id="anova-content" role="tabpanel" aria-labelledby="anova-tab">
+                    <div class="row">
+                      <div class="col-md-4">
+                        <h6>ANOVA Settings</h6>
+                        <div class="mb-3">
+                          <label for="anova-dataset" class="form-label">Select Dataset</label>
+                          <select class="form-select" id="anova-dataset">
+                            <option value="q4-vs-q8">Q4 vs Q8 Performance</option>
+                            <option value="model-comparison">Multi-Model Comparison</option>
+                            <option value="tuning-impact">Fine-tuning Impact</option>
+                            <option value="custom">Custom Dataset</option>
+                          </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                          <label for="anova-factors" class="form-label">Factors</label>
+                          <select class="form-select" id="anova-factors" multiple>
+                            <option value="model">Model Architecture</option>
+                            <option value="quantization">Quantization Level</option>
+                            <option value="dataset">Dataset</option>
+                            <option value="batch-size">Batch Size</option>
+                          </select>
+                          <small class="text-muted">Hold Ctrl/Cmd to select multiple</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                          <label for="anova-metric" class="form-label">Metric</label>
+                          <select class="form-select" id="anova-metric">
+                            <option value="accuracy">Accuracy</option>
+                            <option value="f1">F1 Score</option>
+                            <option value="latency">Latency</option>
+                            <option value="perplexity">Perplexity</option>
+                          </select>
+                        </div>
+                        
+                        <button class="btn btn-primary" id="run-anova">Run Analysis</button>
+                      </div>
+                      
+                      <div class="col-md-8">
+                        <div class="chart-container">
+                          <canvas id="anova-chart"></canvas>
+                        </div>
+                        <div class="card mt-3">
+                          <div class="card-header">ANOVA Results</div>
+                          <div class="card-body">
+                            <pre id="anova-results" class="bg-light p-2" style="font-size: 0.8rem;">
+ANOVA Results:
+F-statistic: 24.37
+p-value: 0.0000142
+Significant differences found between groups.
+
+Post-hoc Tests (Tukey HSD):
+- Q4 vs Q8: p=0.003 (significant)
+- Model A vs Model B: p=0.0001 (significant)
+- Model A vs Model C: p=0.21 (not significant)
+                            </pre>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Regression Tab -->
+                  <div class="tab-pane fade" id="regression-content" role="tabpanel" aria-labelledby="regression-tab">
+                    <div class="row">
+                      <div class="col-md-4">
+                        <h6>Regression Settings</h6>
+                        <div class="mb-3">
+                          <label for="regression-type" class="form-label">Regression Type</label>
+                          <select class="form-select" id="regression-type">
+                            <option value="linear">Linear Regression</option>
+                            <option value="polynomial">Polynomial Regression</option>
+                            <option value="logistic">Logistic Regression</option>
+                          </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                          <label for="regression-x" class="form-label">X Variable</label>
+                          <select class="form-select" id="regression-x">
+                            <option value="model-params">Model Parameters</option>
+                            <option value="dataset-size">Dataset Size</option>
+                            <option value="quantization-bits">Quantization Bits</option>
+                            <option value="training-epochs">Training Epochs</option>
+                          </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                          <label for="regression-y" class="form-label">Y Variable</label>
+                          <select class="form-select" id="regression-y">
+                            <option value="accuracy">Accuracy</option>
+                            <option value="latency">Latency</option>
+                            <option value="memory-usage">Memory Usage</option>
+                            <option value="training-time">Training Time</option>
+                          </select>
+                        </div>
+                        
+                        <button class="btn btn-primary" id="run-regression">Run Regression</button>
+                      </div>
+                      
+                      <div class="col-md-8">
+                        <div class="chart-container">
+                          <canvas id="regression-chart"></canvas>
+                        </div>
+                        <div class="card mt-3">
+                          <div class="card-header">Regression Results</div>
+                          <div class="card-body">
+                            <pre id="regression-results" class="bg-light p-2" style="font-size: 0.8rem;">
+Linear Regression Results:
+y = 0.753x + 12.41
+R² = 0.879
+p-value: < 0.001
+Significant relationship found between variables.
+                            </pre>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Performance Comparison Tab -->
+                  <div class="tab-pane fade" id="perf-comparison-content" role="tabpanel" aria-labelledby="perf-comparison-tab">
+                    <div class="row">
+                      <div class="col-md-4">
+                        <h6>Comparison Settings</h6>
+                        <div class="mb-3">
+                          <label for="perf-models" class="form-label">Select Models</label>
+                          <select class="form-select" id="perf-models" multiple size="4">
+                            <option value="llama-q4">LLaMA-Q4</option>
+                            <option value="llama-q8">LLaMA-Q8</option>
+                            <option value="bloom-q4">BLOOM-Q4</option>
+                            <option value="bloom-q8">BLOOM-Q8</option>
+                            <option value="mistral-q4">Mistral-Q4</option>
+                            <option value="mistral-q8">Mistral-Q8</option>
+                          </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                          <label for="perf-metrics" class="form-label">Metrics</label>
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="metric1" checked>
+                            <label class="form-check-label" for="metric1">Accuracy</label>
+                          </div>
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="metric2" checked>
+                            <label class="form-check-label" for="metric2">Latency</label>
+                          </div>
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="metric3">
+                            <label class="form-check-label" for="metric3">Memory Usage</label>
+                          </div>
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="metric4">
+                            <label class="form-check-label" for="metric4">Tokens per Second</label>
+                          </div>
+                        </div>
+                        
+                        <button class="btn btn-primary" id="run-comparison">Generate Comparison</button>
+                      </div>
+                      
+                      <div class="col-md-8">
+                        <div class="chart-container">
+                          <canvas id="comparison-chart"></canvas>
+                        </div>
+                        <div class="mt-3">
+                          <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-secondary active">Bar Chart</button>
+                            <button type="button" class="btn btn-outline-secondary">Radar Chart</button>
+                            <button type="button" class="btn btn-outline-secondary">Line Chart</button>
+                          </div>
+                          <button class="btn btn-outline-primary float-end">Export Chart</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Custom Chart Tab -->
+                  <div class="tab-pane fade" id="custom-chart-content" role="tabpanel" aria-labelledby="custom-chart-tab">
+                    <div class="row">
+                      <div class="col-md-4">
+                        <h6>Custom Chart Settings</h6>
+                        <div class="mb-3">
+                          <label for="chart-type" class="form-label">Chart Type</label>
+                          <select class="form-select" id="chart-type">
+                            <option value="bar">Bar Chart</option>
+                            <option value="line">Line Chart</option>
+                            <option value="scatter">Scatter Plot</option>
+                            <option value="radar">Radar Chart</option>
+                            <option value="pie">Pie Chart</option>
+                            <option value="boxplot">Box Plot</option>
+                          </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                          <label for="data-source" class="form-label">Data Source</label>
+                          <select class="form-select" id="data-source">
+                            <option value="current">Current Experiments</option>
+                            <option value="upload">Upload CSV</option>
+                            <option value="paste">Paste Data</option>
+                            <option value="api">API Endpoint</option>
+                          </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                          <button class="btn btn-outline-secondary w-100">Configure Data</button>
+                        </div>
+                        
+                        <button class="btn btn-primary" id="generate-chart">Generate Chart</button>
+                      </div>
+                      
+                      <div class="col-md-8">
+                        <div class="chart-container border p-3">
+                          <div class="text-center text-muted py-5">
+                            <i class="bi bi-bar-chart" style="font-size: 3rem;"></i>
+                            <p class="mt-3">Custom chart will appear here</p>
+                            <p class="small">Configure data and click "Generate Chart"</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Fine-Tuning Tab -->
+          <div class="tab-pane fade" id="fine-tuning-content" role="tabpanel" aria-labelledby="fine-tuning-tab">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Model Fine-Tuning</h5>
+                
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="fine-tuning-options">
+                      <h6>Base Model</h6>
+                      <select class="form-select mb-3" id="base-model">
+                        <option value="llama2-7b">LLaMA-2-7B</option>
+                        <option value="mistral-7b">Mistral-7B</option>
+                        <option value="bloom-7b">BLOOM-7B</option>
+                        <option value="falcon-7b">Falcon-7B</option>
+                      </select>
+                      
+                      <h6>Fine-tuning Method</h6>
+                      <select class="form-select mb-3" id="ft-method">
+                        <option value="qlora">QLoRA</option>
+                        <option value="peft">PEFT</option>
+                        <option value="lora">LoRA</option>
+                        <option value="ptuning">P-Tuning v2</option>
+                        <option value="adalora">AdaLoRA</option>
+                      </select>
+                      
+                      <label for="dataset-select">Training Dataset</label>
+                      <select class="form-select mb-3" id="dataset-select">
+                        <option value="custom">Custom Dataset</option>
+                        <option value="alpaca">Alpaca</option>
+                        <option value="dolly">Dolly</option>
+                        <option value="oasst">Open Assistant</option>
+                      </select>
+                      
+                      <label for="data-upload">Upload Data (CSV/JSON)</label>
+                      <input type="file" class="form-control mb-3" id="data-upload">
+                      
+                      <h6>Advanced Parameters</h6>
+                      <div class="row mb-3">
+                        <div class="col-6">
+                          <label for="learning-rate">Learning Rate</label>
+                          <input type="number" class="form-control" id="learning-rate" value="0.0002" step="0.0001">
+                        </div>
+                        <div class="col-6">
+                          <label for="epochs">Epochs</label>
+                          <input type="number" class="form-control" id="epochs" value="3" min="1" max="10">
+                        </div>
+                      </div>
+                      
+                      <div class="row mb-3">
+                        <div class="col-6">
+                          <label for="batch-size">Batch Size</label>
+                          <input type="number" class="form-control" id="batch-size" value="8" min="1">
+                        </div>
+                        <div class="col-6">
+                          <label for="lora-rank">LoRA Rank</label>
+                          <input type="number" class="form-control" id="lora-rank" value="8" min="1">
+                        </div>
+                      </div>
+                      
+                      <div class="mb-3">
+                        <label for="lora-alpha">LoRA Alpha</label>
+                        <input type="number" class="form-control" id="lora-alpha" value="16" min="1">
+                      </div>
+                      
+                      <div class="mb-3">
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" id="use-8bit" checked>
+                          <label class="form-check-label" for="use-8bit">Use 8-bit Quantization</label>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <button class="btn btn-primary w-100 mb-2" id="start-ft">Start Fine-Tuning</button>
+                    <button class="btn btn-outline-secondary w-100" id="reset-ft">Reset Parameters</button>
+                  </div>
+                  
+                  <div class="col-md-8">
+                    <div class="card">
+                      <div class="card-header">Training Progress</div>
+                      <div class="card-body">
+                        <div class="progress mb-3">
+                          <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 45%" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100">45%</div>
+                        </div>
+                        
+                        <div class="row text-center">
+                          <div class="col">
+                            <small class="d-block text-muted">Epoch</small>
+                            <strong>1/3</strong>
+                          </div>
+                          <div class="col">
+                            <small class="d-block text-muted">Batch</small>
+                            <strong>124/280</strong>
+                          </div>
+                          <div class="col">
+                            <small class="d-block text-muted">Loss</small>
+                            <strong>0.3865</strong>
+                          </div>
+                          <div class="col">
+                            <small class="d-block text-muted">Time Left</small>
+                            <strong>12:45</strong>
+                          </div>
+                        </div>
+                        
+                        <div class="chart-container mt-4">
+                          <canvas id="training-chart"></canvas>
+                        </div>
+                        
+                        <div class="card mt-3">
+                          <div class="card-header">Training Log</div>
+                          <div class="card-body p-2">
+                            <pre class="bg-dark text-light p-2" style="font-size: 0.8rem; max-height: 150px; overflow-y: auto;">
+[2023-08-15 14:34:22] Starting fine-tuning with QLoRA...
+[2023-08-15 14:34:24] Loading model LLaMA-2-7B...
+[2023-08-15 14:35:01] Model loaded successfully.
+[2023-08-15 14:35:05] Setting up LoRA adapters with rank=8, alpha=16
+[2023-08-15 14:35:10] Preparing dataset...
+[2023-08-15 14:35:15] Training started. Epochs: 3, Batch size: 8
+[2023-08-15 14:35:30] Epoch 1/3, Batch 1/280, Loss: 0.9821
+[2023-08-15 14:36:15] Epoch 1/3, Batch 20/280, Loss: 0.7523
+[2023-08-15 14:37:02] Epoch 1/3, Batch 40/280, Loss: 0.6231
+[2023-08-15 14:37:48] Epoch 1/3, Batch 60/280, Loss: 0.5720
+[2023-08-15 14:38:35] Epoch 1/3, Batch 80/280, Loss: 0.4980
+[2023-08-15 14:39:21] Epoch 1/3, Batch 100/280, Loss: 0.4265
+[2023-08-15 14:40:07] Epoch 1/3, Batch 120/280, Loss: 0.3865
+                            </pre>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="mt-3 d-flex justify-content-between">
+                      <button class="btn btn-warning" id="pause-ft">Pause Training</button>
+                      <button class="btn btn-danger" id="stop-ft">Stop Training</button>
+                      <button class="btn btn-success" id="export-model">Export Model</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="mt-4">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">System Status</h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-striped mb-0">
+              <thead>
+                <tr>
+                  <th>Resource</th>
+                  <th>Usage</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><i class="bi bi-cpu"></i> GPU Memory</td>
+                  <td>
+                    <div class="progress">
+                      <div class="progress-bar bg-success" style="width: 65%">65%</div>
+                    </div>
+                  </td>
+                  <td><span class="badge bg-success">Normal</span></td>
+                </tr>
+                <tr>
+                  <td><i class="bi bi-memory"></i> RAM</td>
+                  <td>
+                    <div class="progress">
+                      <div class="progress-bar bg-warning" style="width: 82%">82%</div>
+                    </div>
+                  </td>
+                  <td><span class="badge bg-warning">High</span></td>
+                </tr>
+                <tr>
+                  <td><i class="bi bi-hdd"></i> Storage</td>
+                  <td>
+                    <div class="progress">
+                      <div class="progress-bar bg-success" style="width: 45%">45%</div>
+                    </div>
+                  </td>
+                  <td><span class="badge bg-success">Normal</span></td>
+                </tr>
+                <tr>
+                  <td><i class="bi bi-speedometer2"></i> API Requests</td>
+                  <td>
+                    <div class="progress">
+                      <div class="progress-bar bg-info" style="width: 30%">30%</div>
+                    </div>
+                  </td>
+                  <td><span class="badge bg-info">Low</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <footer class="footer mt-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4">
+          <h5>CrossDebate AI Platform</h5>
+          <p>Advanced interface for interacting with and fine-tuning quantized language models.</p>
+          <div class="d-flex gap-3 mt-3">
+            <a href="#" class="text-secondary"><i class="bi bi-github"></i></a>
+            <a href="#" class="text-secondary"><i class="bi bi-twitter"></i></a>
+            <a href="#" class="text-secondary"><i class="bi bi-discord"></i></a>
+            <a href="#" class="text-secondary"><i class="bi bi-youtube"></i></a>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <h5>Platform</h5>
+          <ul class="list-unstyled">
+            <li><a href="#" class="text-decoration-none text-secondary">Models</a></li>
+            <li><a href="#" class="text-decoration-none text-secondary">Datasets</a></li>
+            <li><a href="#" class="text-decoration-none text-secondary">Tutorials</a></li>
+            <li><a href="#" class="text-decoration-none text-secondary">API</a></li>
+          </ul>
+        </div>
+        <div class="col-md-2">
+          <h5>Resources</h5>
+          <ul class="list-unstyled">
+            <li><a href="#" class="text-decoration-none text-secondary">Documentation</a></li>
+            <li><a href="#" class="text-decoration-none text-secondary">Examples</a></li>
+            <li><a href="#" class="text-decoration-none text-secondary">Guides</a></li>
+            <li><a href="#" class="text-decoration-none text-secondary">Papers</a></li>
+          </ul>
+        </div>
+        <div class="col-md-4">
+          <h5>Subscribe to Updates</h5>
+          <p>Get the latest news about model releases and features.</p>
+          <div class="input-group mb-3">
+            <input type="email" class="form-control" placeholder="Your email">
+            <button class="btn btn-primary" type="button">Subscribe</button>
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class="d-flex justify-content-between align-items-center">
+        <p class="mb-0">&copy; 2023 CrossDebate. All rights reserved.</p>
+        <div>
+          <a href="#" class="text-decoration-none text-secondary me-3">Terms</a>
+          <a href="#" class="text-decoration-none text-secondary me-3">Privacy</a>
+          <a href="#" class="text-decoration-none text-secondary">Cookies</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Sample code to initialize charts
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize ANOVA chart
+      const anovaCtx = document.getElementById('anova-chart').getContext('2d');
+      new Chart(anovaCtx, {
+        type: 'bar',
+        data: {
+          labels: ['Q4 Models', 'Q8 Models', 'Base Models'],
+          datasets: [{
+            label: 'Mean Accuracy',
+            data: [0.78, 0.84, 0.87],
+            backgroundColor: ['#8ecae6', '#219ebc', '#023047']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Model Accuracy by Quantization Level'
+            }
+          }
+        }
+      });
+      
+      // Initialize training chart
+      const trainingCtx = document.getElementById('training-chart').getContext('2d');
+      new Chart(trainingCtx, {
+        type: 'line',
+        data: {
+          labels: Array.from({length: 12}, (_, i) => i*10),
+          datasets: [
+            {
+              label: 'Training Loss',
+              data: [0.98, 0.88, 0.82, 0.75, 0.70, 0.65, 0.60, 0.55, 0.50, 0.45, 0.42, 0.39],
+              borderColor: '#d90429',
+              backgroundColor: 'rgba(217, 4, 41, 0.1)',
+              fill: true,
+              tension: 0.4
+            },
+            {
+              label: 'Validation Loss',
+              data: [0.99, 0.89, 0.84, 0.79, 0.75, 0.72, 0.69, 0.67, 0.65, 0.64, 0.63, 0.62],
+              borderColor: '#4361ee',
+              backgroundColor: 'rgba(67, 97, 238, 0.1)',
+              fill: true,
+              tension: 0.4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Training Progress'
+            }
+          },
+          scales: {
+            y: {
+              title: {
+                display: true,
+                text: 'Loss'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Batches'
+              }
+            }
+          }
+        }
+      });
+      
+      // Temperature display
+      document.getElementById('q4temperature').addEventListener('input', function() {
+        document.getElementById('q4tempValue').textContent = this.value;
+      });
+      
+      document.getElementById('q8temperature').addEventListener('input', function() {
+        document.getElementById('q8toppValue').textContent = this.value;
+      });
+      
+      // Q4 chat functionality
+      document.getElementById('q4send').addEventListener('click', function() {
+        const messageInput = document.getElementById('q4message');
+        const message = messageInput.value.trim();
+        
+        if (message) {
+          const chatContainer = document.getElementById('q4chat');
+          
+          // Add user message
+          const userMessage = document.createElement('div');
+          userMessage.className = 'message user-message';
+          userMessage.innerHTML = `<p>${message}</p>`;
+          chatContainer.appendChild(userMessage);
+          
+          // Clear input
+          messageInput.value = '';
+          
+          // Scroll to bottom
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+          
+          // Simulate response (in a real app, this would call an API)
+          setTimeout(() => {
+            const botMessage = document.createElement('div');
+            botMessage.className = 'message bot-message';
+            botMessage.innerHTML = `<p>This is a simulated response from the Q4 model. In a real application, this would be generated by the selected model.</p>`;
+            chatContainer.appendChild(botMessage);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+          }, 1000);
+        }
+      });
+      
+      // Allow Enter key to send message
+      document.getElementById('q4message').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          document.getElementById('q4send').click();
+        }
+      });
+      
+      // Same for Q8 chat
+      document.getElementById('q8send').addEventListener('click', function() {
+        const messageInput = document.getElementById('q8message');
+        const message = messageInput.value.trim();
+        
+        if (message) {
+          const chatContainer = document.getElementById('q8chat');
+          
+          // Add user message
+          const userMessage = document.createElement('div');
+          userMessage.className = 'message user-message';
+          userMessage.innerHTML = `<p>${message}</p>`;
+          chatContainer.appendChild(userMessage);
+          
+          // Clear input
+          messageInput.value = '';
+          
+          // Scroll to bottom
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+          
+          // Simulate response
+          setTimeout(() => {
+            const botMessage = document.createElement('div');
+            botMessage.className = 'message bot-message';
+            botMessage.innerHTML = `<p>This is a simulated response from the Q8 model. In a real application, this would be generated by the selected model with higher precision.</p>`;
+            chatContainer.appendChild(botMessage);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+          }, 1000);
+        }
+      });
+      
+      document.getElementById('q8message').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          document.getElementById('q8send').click();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

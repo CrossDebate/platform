@@ -1,0 +1,32 @@
+/* Contraste de foco visível */
+:focus {
+  outline: 3px solid #005fcc;
+  outline-offset: 2px;
+}
+
+/* Responsividade básica */
+body {
+  font-size: 1rem;
+  line-height: 1.5;
+  background: #fff;
+  color: #222;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Layout responsivo */
+@media (max-width: 600px) {
+  header, nav, main, footer {
+    padding: 1rem;
+  }
+  /* ...outros ajustes responsivos... */
+}
+
+/* Contraste mínimo recomendado */
+a, button {
+  color: #005fcc;
+  background: #fff;
+}

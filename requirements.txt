@@ -1,0 +1,20 @@
+# Core packages
+numpy
+pandas
+matplotlib
+scipy
+scikit-learn
+
+# Web frameworks
+flask
+django
+
+# Data processing
+requests
+beautifulsoup4
+lxml
+
+# Utilities
+tqdm
+pillow
+jupyter
